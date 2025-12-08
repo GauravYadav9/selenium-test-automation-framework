@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%X{suite}|%X{browser}|%t] %-5p %d{yyyy-MM-dd HH:mm:ss.SSS} %c{1}:%L - %m%n"/>
+        </Console>
+
+        <!-- Writes to logs/automation.log; createOnDemand ensures the logs folder is created -->
+        <File name="File" fileName="logs/automation.log" append="true" createOnDemand="true" immediateFlush="true">
+            <PatternLayout pattern="[%X{suite}|%X{browser}|%t] %-5p %d{yyyy-MM-dd HH:mm:ss.SSS} %c{1}:%L - %m%n"/>
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>
