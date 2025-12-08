@@ -1,0 +1,62 @@
+# Java & Maven build output
+target/
+*.class
+*.jar
+*.war
+*.zip
+*.tar.gz
+
+# Maven wrapper & metadata
+.mvn/
+mvnw
+mvnw.cmd
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# IDE and editor configs
+.idea/
+*.iml
+*.swp
+*.swo
+.classpath
+.project
+.settings/
+
+# Logs and test output
+*.log
+logs/
+reports/
+test-output/
+screenshots/
+
+# Temp / local working directories
+temp/
+docs/
+
+# OS / Misc files
+.DS_Store
+Thumbs.db
+hs_err_pid*
+
+# Git & GitHub metadata (not needed in image)
+.git/
+.gitignore
+.github/
+
+# Node (if any frontend part)
+node_modules/
+
+# Docker / CI noise
+docker-compose.yml
+docker-compose-grid.yml
+docker-compose.override.yml
+Jenkinsfile
+
+# Documentation and text files (not needed for build)
+*.md
+*.txt
