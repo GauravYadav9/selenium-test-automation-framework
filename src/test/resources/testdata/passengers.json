@@ -1,0 +1,36 @@
+[
+  {
+    "origin": "Paris",
+    "destination": "Rome",
+    "firstName": "Emily",
+    "lastName": "Johnson",
+    "address": "456 Oak Avenue",
+    "city": "Metropolis",
+    "state": "MS",
+    "zipCode": "54321",
+    "cardType": "Diner's Club",
+    "cardNumber": "5555666677778888",
+    "month": "11",
+    "year": "2026",
+    "cardName": "Emily Johnson",
+    "age": 34,
+    "gender": "Female"
+  },
+  {
+    "origin": "Boston",
+    "destination": "London",
+    "firstName": "Michael",
+    "lastName": "Brown",
+    "address": "789 Pine Street",
+    "city": "Gotham",
+    "state": "GS",
+    "zipCode": "67890",
+    "cardType": "American Express",
+    "cardNumber": "9999888877776666",
+    "month": "06",
+    "year": "2027",
+    "cardName": "Michael Brown",
+    "age": 45,
+    "gender": "Male"
+  }
+]
