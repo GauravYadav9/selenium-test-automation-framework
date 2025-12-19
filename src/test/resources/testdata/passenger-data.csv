@@ -1,0 +1,3 @@
+origin,destination,firstName,lastName,address,city,state,zipCode,cardType,cardNumber,month,year,cardName,age,gender
+Philadelphia,Berlin,Peter,Jones,1100 Main St,Philly,PA,98765,Visa,1111222233334444,08,2028,Peter Jones,28,Male
+Mexico City,London,Maria,Garcia,Crater St 7,Mexico City,MC,55555,American Express,5555444433332222,10,2029,Maria Garcia,35,Female
