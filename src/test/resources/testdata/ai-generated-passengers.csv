@@ -1,0 +1,11 @@
+origin,destination,firstName,lastName,address,city,state,zipCode,cardType,cardNumber,month,year,cardName,age,gender
+Paris,Rome,Astrid,Lopez,789 Maple Street,Naples,NA,00123,Visa,4532015112830366,06,2027,Astrid Lopez,27,Female
+Philadelphia,Berlin,Ethan,Hall,456 Elm Street,Frankfurt,DE,10115,MasterCard,5105105105100000,03,2028,Ethan Hall,32,Male
+Boston,London,Liam,Brown,789 Oak Street,London,GB,W1A 1AA,American Express,371449635398431,09,2029,Liam Brown,25,Male
+San Diego,Dublin,Ava,Davis,456 Pine Street,Dublin,IE,12345,Diner's Club,30569309025904,05,2030,Ava Davis,38,Female
+Mexico City,Cairo,Noah,Garcia,789 Cedar Street,Cairo,EG,12345,Visa,4111111111111111,08,2026,Noah Garcia,22,Male
+Paris,Rome,Sophia,Lee,456 Spruce Street,Naples,NA,00123,MasterCard,5105105105100000,04,2028,Sophia Lee,29,Female
+Boston,London,Oliver,White,789 Elm Street,London,GB,W1A 1AA,American Express,371449635398431,10,2029,Oliver White,31,Male
+San Diego,Dublin,Mia,Hernandez,456 Pine Street,Dublin,IE,12345,Diner's Club,30569309025904,06,2030,Mia Hernandez,40,Female
+Mexico City,Cairo,Julian,Rodriguez,789 Cedar Street,Cairo,EG,12345,Visa,4111111111111111,07,2026,Julian Rodriguez,24,Male
+Paris,Rome,Charlotte,Kim,456 Spruce Street,Naples,NA,00123,MasterCard,5105105105100000,02,2028,Charlotte Kim,28,Female
