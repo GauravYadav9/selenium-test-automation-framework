@@ -1,0 +1,49 @@
+# Docker Compose file used by the Jenkins pipeline (startDockerGrid) to spin up a Selenium Grid.
+# For local development, use manual docker run commands with
+# exposed ports (-p 4444:4444 etc.) as documented in the project setup guide.
+
+
+services:
+  # Central Hub – handles session distribution to browser nodes
+  selenium-hub:
+    image: selenium/hub:4.27
+    networks:
+      - grid
+    environment:
+      - GRID_TIMEOUT=60             # Hub waits 60s before timing out a session
+      - GRID_CLEAN_UP_CYCLE=60      # Cleans up stale sessions every 60s
+    
+  # Chrome Node – single session (parallel is across browsers, not within)
+  chrome:
+    image: selenium/node-chromium:4.27
+    shm_size: "2g"                  # Prevents Chrome crashes due to memory
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true  # Allows overriding default
+      - SE_NODE_MAX_SESSIONS=1              # One session per node
+    networks:
+      - grid
+
+  # Firefox Node – single session (parallel is across browsers, not within)
+  firefox:
+    image: selenium/node-firefox:4.27
+    shm_size: "2g"
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=1
+    networks:
+      - grid
+
+networks:
+  grid:
+    name: ${NETWORK_NAME:-selenium_grid_network}
+    external: true

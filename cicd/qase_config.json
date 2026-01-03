@@ -1,0 +1,8 @@
+{
+  "smoke": {
+    "testCaseIds": "[1,2]"
+  },
+  "regression": {
+    "testCaseIds": "[3]"
+  }
+}
