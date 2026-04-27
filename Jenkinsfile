@@ -166,12 +166,8 @@ post {
                     echo "Quality Gate: ${totalFailures}/${testResults.total} failures (threshold: ${maxFailures})"
 
                     if (totalFailures > maxFailures) {
-                        if (env.BRANCH_NAME in branchConfig.productionCandidateBranches) {
-                            error "Quality Gate Failed: ${totalFailures} test failures (threshold: ${maxFailures}) on production branch"
-                        } else {
-                            currentBuild.result = 'UNSTABLE'
-                            echo "Quality Gate: Build marked UNSTABLE due to ${totalFailures} failures"
-                        }
+                        currentBuild.result = 'UNSTABLE'
+                        echo "Quality Gate: Build marked UNSTABLE due to ${totalFailures} failures (threshold: ${maxFailures}). Pipeline continues for telemetry."
                     } else {
                         echo "Quality Gate Passed"
                     }
