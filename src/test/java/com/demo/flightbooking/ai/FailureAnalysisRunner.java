@@ -12,7 +12,6 @@ import java.nio.file.Path;
  * Prerequisites: run tests first (mvn test), ensure Ollama is running.
  *
  * Usage:
- *   IDE: Right-click → Run FailureAnalysisRunner.main()
  *   CLI: mvn exec:java -Dexec.mainClass="com.demo.flightbooking.ai.FailureAnalysisRunner"
  *
  * Output: target/failure-analysis-report.md

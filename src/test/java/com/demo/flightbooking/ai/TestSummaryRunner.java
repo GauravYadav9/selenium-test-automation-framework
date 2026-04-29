@@ -10,7 +10,6 @@ import java.nio.file.Path;
  * Not a test class — standalone utility in test source tree.
  *
  * Usage:
- * IDE: Right-click → Run TestSummaryRunner.main()
  * CLI: mvn exec:java -Dexec.mainClass="com.demo.flightbooking.ai.TestSummaryRunner"
  *
  * Output: target/ai-summary-report.md

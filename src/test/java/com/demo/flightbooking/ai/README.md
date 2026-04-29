@@ -51,14 +51,16 @@ Outputs to CSV for consumption by TestNG DataProviders.
 
 ### Root Cause Analysis
 
-Runs post-build to parse `testng-results.xml` and `automation.log`, masks sensitive data,
-and generates a structured failure analysis report.
+Runs post-build to dynamically discover all `testng-results.xml` files across parallel browser
+directories (e.g., `target/chrome/surefire-reports/`, `target/firefox/surefire-reports/`) using
+`Files.walk()`, aggregates test counts and failure blocks, filters `automation.log` to relevant
+entries, masks sensitive data, and generates a structured failure analysis report.
 
 | Class | Role |
 |---|---|
-| `AiFailureAnalyzer` | Orchestrator — reads XML, extracts failures, filters logs, calls LLM, writes report |
+| `AiFailureAnalyzer` | Orchestrator — walks workspace for all Surefire XMLs, aggregates failures across browsers, filters logs, calls LLM, writes report |
 | `FailureAnalysisService` | LangChain4j service interface — 7-section analysis prompt |
-| `FailureAnalysisRunner` | CLI entry point (also invoked by Jenkins shared library) |
+| `FailureAnalysisRunner` | CLI entry point (also invoked by Jenkins shared library via `mvn exec:java`) |
 | `AiFailureAnalyzerTest` | Unit tests with mock model |
 
 ---
