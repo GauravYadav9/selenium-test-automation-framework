@@ -104,7 +104,12 @@ options {
                                         cleanWs()
                                         checkout scm
                                         sh script: "${mvnBase} -Dbrowser=chrome -Dreport.dir=chrome -Dsurefire.reportsDirectory=target/chrome/surefire-reports", returnStatus: true
-                                        stash name: 'chrome-artifacts', includes: 'reports/**, **/surefire-reports/**, **/*-failure-summary.txt', allowEmpty: true
+                                        sh """
+                                            mkdir -p target/chrome/surefire-reports || true
+                                            mv target/surefire-reports/* target/chrome/surefire-reports/ 2>/dev/null || true
+                                            mv logs/automation.log logs/chrome-automation.log || true
+                                        """
+                                        stash name: 'chrome-artifacts', includes: 'reports/**, **/surefire-reports/**, **/*-failure-summary.txt, logs/chrome-automation.log', allowEmpty: true
                                     }
                                 },
                                 Firefox: {
@@ -112,7 +117,12 @@ options {
                                         cleanWs()
                                         checkout scm
                                         sh script: "${mvnBase} -Dbrowser=firefox -Dreport.dir=firefox -Dsurefire.reportsDirectory=target/firefox/surefire-reports", returnStatus: true
-                                        stash name: 'firefox-artifacts', includes: 'reports/**, **/surefire-reports/**, **/*-failure-summary.txt', allowEmpty: true
+                                        sh """
+                                            mkdir -p target/firefox/surefire-reports || true
+                                            mv target/surefire-reports/* target/firefox/surefire-reports/ 2>/dev/null || true
+                                            mv logs/automation.log logs/firefox-automation.log || true
+                                        """
+                                        stash name: 'firefox-artifacts', includes: 'reports/**, **/surefire-reports/**, **/*-failure-summary.txt, logs/firefox-automation.log', allowEmpty: true
                                     }
                                 }
                             )
@@ -140,7 +150,9 @@ post {
                     } catch (e) {
                         echo "Firefox artifacts not found to unstash."
                     }
-
+                    
+                    // Stitch per-browser logs back together for the AI Analyzer
+                    sh "cat logs/chrome-automation.log logs/firefox-automation.log > logs/automation.log 2>/dev/null || true"
                     sh "cp reports/chrome/${env.SUITE_TO_RUN}-chrome-report.html reports/chrome/index.html || echo 'Chrome report not found'"
                     sh "cp reports/firefox/${env.SUITE_TO_RUN}-firefox-report.html reports/firefox/index.html || echo 'Firefox report not found'"
                     junit testResults: '**/surefire-reports/**/*.xml', allowEmptyResults: true
