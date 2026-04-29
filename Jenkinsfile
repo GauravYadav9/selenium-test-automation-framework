@@ -18,7 +18,7 @@ options {
     )
     buildDiscarder(logRotator(
         numToKeepStr: '5',
-        artifactNumToKeepStr: '0'
+        artifactNumToKeepStr: '5'
     ))
     disableConcurrentBuilds()
 }
@@ -103,7 +103,7 @@ options {
                                     docker.image('flight-booking-agent-prewarmed:latest').inside("-v /var/run/docker.sock:/var/run/docker.sock --network=${env.NETWORK_NAME} --entrypoint=\"\"") {
                                         cleanWs()
                                         checkout scm
-                                        sh script: "${mvnBase} -Dbrowser=chrome -Dreport.dir=chrome -Dproject.build.directory=target-chrome", returnStatus: true
+                                        sh script: "${mvnBase} -Dbrowser=chrome -Dreport.dir=chrome -Dsurefire.reportsDirectory=target/chrome/surefire-reports", returnStatus: true
                                         stash name: 'chrome-artifacts', includes: 'reports/**, **/surefire-reports/**, **/*-failure-summary.txt', allowEmpty: true
                                     }
                                 },
@@ -111,7 +111,7 @@ options {
                                     docker.image('flight-booking-agent-prewarmed:latest').inside("-v /var/run/docker.sock:/var/run/docker.sock --network=${env.NETWORK_NAME} --entrypoint=\"\"") {
                                         cleanWs()
                                         checkout scm
-                                        sh script: "${mvnBase} -Dbrowser=firefox -Dreport.dir=firefox -Dproject.build.directory=target-firefox", returnStatus: true
+                                        sh script: "${mvnBase} -Dbrowser=firefox -Dreport.dir=firefox -Dsurefire.reportsDirectory=target/firefox/surefire-reports", returnStatus: true
                                         stash name: 'firefox-artifacts', includes: 'reports/**, **/surefire-reports/**, **/*-failure-summary.txt', allowEmpty: true
                                     }
                                 }
