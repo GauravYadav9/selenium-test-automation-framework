@@ -213,9 +213,13 @@ Two layered Docker images:
 
 4. Each browser:
 
-   * Uses its own workspace
-   * Generates isolated reports
-5. Results are stashed and merged
+   * Uses its own workspace (`main` and `main@2`)
+   * Generates isolated reports and surefire XMLs
+   * Surefire reports are isolated per browser via POM binding (`-Dsurefire.reportsDirectory=target/{browser}/surefire-reports`) with OS-level bash `mv` as a defense-in-depth safety net
+   * Logs are renamed per browser (`chrome-automation.log`, `firefox-automation.log`) before stashing
+5. Results are stashed, unstashed, and aggregated:
+   * Surefire XMLs exist at distinct paths — no overwrite collision
+   * Per-browser logs are concatenated into a single `automation.log` for AI analysis context
 
 ---
 
@@ -286,7 +290,8 @@ Automated validation of test results to prevent broken code from progressing thr
 
 * **Threshold-based enforcement**: Configurable via `QUALITY_GATE_THRESHOLD` Jenkins parameter
 * **Dual-format XML parsing**: Supports both JUnit (surefire) and TestNG reports
-* **Parallel result aggregation**: Combines Chrome + Firefox test results
+* **Parallel result aggregation**: Combines Chrome + Firefox test results from isolated surefire directories
+* **Defense-in-depth isolation**: POM binding ensures Maven writes to `target/{browser}/surefire-reports/`; bash `mv` commands guarantee isolation regardless of Maven's CLI property resolution behavior
 * **Branch-specific policies**:
   * Feature branches → UNSTABLE (allows continued development)
   * Protected branches → FAILURE (prevents merges)

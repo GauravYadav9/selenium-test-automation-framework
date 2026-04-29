@@ -31,11 +31,12 @@ This document outlines the policies, behaviors, and operational procedures for t
 2. **Initialize & Start Grid** — Creates isolated Docker network, starts Selenium Grid, validates health
 3. **Approval Gate** — Optional manual approval for regression on protected branches
 4. **Parallel Tests** — Chrome and Firefox execute simultaneously in separate containers
-5. **Report Aggregation** — Results from both browsers are merged and published
-6. **Quality Gate** — Evaluates aggregated test results against threshold
-7. **AI Analysis** — Optional, non-blocking failure analysis (branch-gated)
-8. **Notifications** — Email sent on status changes; Qase results published
-9. **Cleanup** — Grid shutdown, container removal, workspace cleanup (guaranteed)
+5. **Artifact Isolation** — Per-browser surefire reports are isolated (POM binding + bash mv); per-browser logs are renamed and stashed
+6. **Report Aggregation** — Surefire XMLs from both browsers are unstashed to distinct paths; per-browser logs are concatenated into a single `automation.log` for AI context
+7. **Quality Gate** — Evaluates aggregated test results against threshold
+8. **AI Analysis** — Optional, non-blocking failure analysis (branch-gated)
+9. **Notifications** — Email sent on status changes; Qase results published
+10. **Cleanup** — Grid shutdown, container removal, workspace cleanup (guaranteed)
 
 ## 3. Pipeline Features
 
@@ -113,7 +114,7 @@ The pipeline includes several performance enhancements to balance speed and reli
 **Automatic cleanup:**
 
 - Keeps last 5 builds per branch
-- Archives 0 artifacts (reports published to Jenkins UI only)
+- Retains artifacts for last 5 builds (reports, logs, AI analysis reports)
 - HTML reports: `keepAll=false` (only latest retained)
 
 **Result:** Build metadata stays under 1MB per build (down from 4-5MB), preventing UI slowdown.

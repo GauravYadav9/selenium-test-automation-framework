@@ -91,10 +91,11 @@ For debugging, tests can also be run directly from the IDE with:
 ## 📊 Test Reports
 
 After test execution, detailed HTML reports are available in:
-- `reports/{browser}/` - Individual test run reports
-- `target/surefire-reports/` - TestNG reports and logs
+- `reports/{browser}/` - Individual test run reports (ExtentReports)
+- `target/{browser}/surefire-reports/` - TestNG/Surefire XML reports (isolated per browser in CI)
+- `target/failure-analysis-report.md` - AI-generated failure root cause analysis (CI only, when failures are detected)
 
-Reports are generated **per browser execution** and aggregated in CI.
+Reports are generated **per browser execution** and aggregated in CI. Surefire XML reports are isolated per browser to prevent parallel overwrite collisions.
 
 ## 🔧 Configuration
 
