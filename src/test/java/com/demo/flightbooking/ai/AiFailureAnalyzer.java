@@ -66,39 +66,58 @@ public class AiFailureAnalyzer {
     public Path analyze() {
         logger.info("=== AI Failure Analysis Started ===");
 
-        // Read Surefire XML
-        Path surefirePath = Paths.get("target", "surefire-reports", "testng-results.xml");
-        if (!Files.exists(surefirePath)) {
-            logger.warn("Surefire XML not found at {}. Run tests first.", surefirePath);
-            return null;
-        }
-
-        String surefireXml;
-        try {
-            surefireXml = Files.readString(surefirePath);
+        // Dynamically find ALL testng-results.xml files
+        // Handles: target/ (local), target-chrome/ and target-firefox/ (CI parallel)
+        List<Path> xmlFiles = new ArrayList<>();
+        try (var stream = Files.walk(Paths.get("."))) {
+            stream.filter(Files::isRegularFile)
+                    .filter(p -> p.toString().contains("surefire-reports")
+                            && p.getFileName().toString().equals("testng-results.xml"))
+                    .forEach(xmlFiles::add);
         } catch (IOException e) {
-            logger.error("Failed to read Surefire XML: {}", surefirePath, e);
+            logger.error("Failed to scan for Surefire XML files", e);
             return null;
         }
 
-        // Extract test counts from XML attributes
-        int total = extractAttribute(surefireXml, "total");
-        int passed = extractAttribute(surefireXml, "passed");
-        int failed = extractAttribute(surefireXml, "failed");
-        int skipped = extractAttribute(surefireXml, "skipped");
+        if (xmlFiles.isEmpty()) {
+            logger.warn("No Surefire XML files found in workspace. Run tests first.");
+            return null;
+        }
 
-        logger.info("Test results — Total: {}, Passed: {}, Failed: {}, Skipped: {}",
-                total, passed, failed, skipped);
+        logger.info("Found {} Surefire XML file(s): {}", xmlFiles.size(), xmlFiles);
 
-        // No failures detected
+        // Aggregate test counts and failure blocks across all browser XMLs
+        int total = 0, passed = 0, failed = 0, skipped = 0;
+        StringBuilder combinedFailures = new StringBuilder();
+
+        for (Path xmlPath : xmlFiles) {
+            try {
+                String surefireXml = Files.readString(xmlPath);
+                total += extractAttribute(surefireXml, "total");
+                passed += extractAttribute(surefireXml, "passed");
+                failed += extractAttribute(surefireXml, "failed");
+                skipped += extractAttribute(surefireXml, "skipped");
+
+                String blocks = extractFailureBlocks(surefireXml);
+                if (!blocks.contains("[No failure blocks found in XML]")) {
+                    combinedFailures.append(blocks).append("\n");
+                }
+            } catch (IOException e) {
+                logger.error("Failed to read Surefire XML: {}", xmlPath, e);
+            }
+        }
+
+        logger.info("Aggregated test results across {} browser(s) — Total: {}, Passed: {}, Failed: {}, Skipped: {}",
+                xmlFiles.size(), total, passed, failed, skipped);
+
+        // No failures detected across any browser
         if (failed == 0) {
-            logger.info("No failures detected. Skipping AI analysis.");
+            logger.info("No failures detected across any browser. Skipping AI analysis.");
             return null;
         }
 
-        // Extract structured failure blocks from XML
-        String structuredFailures = extractFailureBlocks(surefireXml);
-        logger.info("Extracted {} structured failure block(s) from XML", failed);
+        String structuredFailures = combinedFailures.toString();
+        logger.info("Extracted failure blocks from {} XML file(s)", xmlFiles.size());
 
         // Read automation log — filtered to ERROR/WARN + failure context
         Path logPath = Paths.get("logs", "automation.log");
