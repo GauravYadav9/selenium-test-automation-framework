@@ -123,9 +123,9 @@ The framework supports multiple test data formats:
 
 This repository intentionally separates **architectural intent** from **execution behavior**.
 
-> Start with **CI-CD-architecture.md** for the big picture, then refer to **PIPELINE_GUIDE.md** for execution details.
+> Start with **CI_CD_ARCHITECTURE.md** for the big picture, then refer to **PIPELINE_GUIDE.md** for execution details.
 
-- **[CI-CD-architecture.md](docs/CI-CD-architecture.md)**  
+- **[CI_CD_ARCHITECTURE.md](docs/CI_CD_ARCHITECTURE.md)**  
   High-level CI/CD design — infrastructure, Docker strategy, JCasC, Selenium Grid, and integrations.
 
 - **[PIPELINE_GUIDE.md](docs/PIPELINE_GUIDE.md)**  
