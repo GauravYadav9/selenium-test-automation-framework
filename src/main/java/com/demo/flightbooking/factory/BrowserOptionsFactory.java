@@ -39,8 +39,8 @@ public class BrowserOptionsFactory {
     public static MutableCapabilities getOptions(BrowserType browserType, boolean isHeadless) {
 
         logger.info("Configuring capabilities for {} (Headless: {})", browserType, isHeadless);
-        String browserVersion = ConfigReader.getProperty("browser.version");
-        if (browserVersion != null && !browserVersion.isEmpty()) {
+        String browserVersion = ConfigReader.getProperty("browser.version", "");
+        if (!browserVersion.isEmpty()) {
             logger.info("Targeting specific {} version: {}", browserType, browserVersion);
         }
 
@@ -51,7 +51,7 @@ public class BrowserOptionsFactory {
                 if (isHeadless) {
                     chromeOptions.addArguments("--headless=new", "--window-size=1920,1080");
                 }
-                if (browserVersion != null && !browserVersion.isEmpty()) {
+                if (!browserVersion.isEmpty()) {
                     chromeOptions.setBrowserVersion(browserVersion);
                 }
                 return chromeOptions;
@@ -61,7 +61,7 @@ public class BrowserOptionsFactory {
                 if (isHeadless) {
                     firefoxOptions.addArguments("--headless", "--width=1920", "--height=1080");
                 }
-                if (browserVersion != null && !browserVersion.isEmpty()) {
+                if (!browserVersion.isEmpty()) {
                     firefoxOptions.setBrowserVersion(browserVersion);
                 }
                 return firefoxOptions;
@@ -72,7 +72,7 @@ public class BrowserOptionsFactory {
                 if (isHeadless) {
                     edgeOptions.addArguments("--headless=new", "--window-size=1920,1080");
                 }
-                if (browserVersion != null && !browserVersion.isEmpty()) {
+                if (!browserVersion.isEmpty()) {
                     edgeOptions.setBrowserVersion(browserVersion);
                 }
                 return edgeOptions;
