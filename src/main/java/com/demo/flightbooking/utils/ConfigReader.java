@@ -2,6 +2,8 @@ package com.demo.flightbooking.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +11,6 @@ import com.demo.flightbooking.enums.EnvironmentType;
 
 /**
  * A utility class to read configuration settings.
- *
  * It uses a priority-based lookup to allow runtime overrides:
  * 1. Java System Property (e.g., -Dbrowser=firefox)
  * 2. config.properties file
@@ -22,20 +23,22 @@ public class ConfigReader {
     // Loads 'config.properties' from 'src/main/resources' or 'src/test/resources'
     private static final String CONFIG_FILE = System.getProperty("configFile", "config/config.properties");
 
+    private ConfigReader() {
+        // Utility class — prevent instantiation
+    }
+
     /**
      * Static block to load the properties file when the class is initialized.
      */
     static {
         try (InputStream stream = ConfigReader.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
             if (stream == null) {
-                logger.error("Configuration file not found: {}", CONFIG_FILE);
-                throw new RuntimeException("Configuration file not found: " + CONFIG_FILE);
+                throw new IllegalStateException("Configuration file not found: " + CONFIG_FILE);
             }
             properties.load(stream);
             logger.info("Configuration successfully loaded from: {}", CONFIG_FILE);
         } catch (IOException e) {
-            logger.error("Failed to load configuration file: {}", CONFIG_FILE, e);
-            throw new RuntimeException("Failed to load configuration", e);
+            throw new IllegalStateException("Failed to load configuration file: " + CONFIG_FILE, e);
         }
     }
 
@@ -91,13 +94,12 @@ public class ConfigReader {
      * @return The property value as an int.
      */
     public static int getPropertyAsInt(String key) {
-        // Use the new default-aware getProperty method
-        String value = getProperty(key, "0"); // Default to "0" if not found
+        String value = getProperty(key, "0");
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {
             logger.error("Property '{}' value '{}' is not a valid integer. Defaulting to 0.", key, value, e);
-            return 0; // Return 0 on format error
+            return 0;
         }
     }
 
@@ -107,28 +109,26 @@ public class ConfigReader {
      * @return The target application URL for the test run.
      */
     public static String getApplicationUrl() {
-        // 'env' is a perfect example of a system property override
         String env = System.getProperty("env");
         if (env == null || env.trim().isEmpty()) {
             logger.info("No 'env' system property provided. Using default 'application.url'.");
-            // Use the default-aware method
             return getProperty("application.url", "https://blazedemo.com/");
         }
 
         EnvironmentType environmentType;
         try {
-            environmentType = EnvironmentType.valueOf(env.toUpperCase().trim());
+            environmentType = EnvironmentType.valueOf(env.toUpperCase(Locale.ENGLISH).trim());
             logger.info("Running tests on environment: {}", environmentType);
         } catch (IllegalArgumentException e) {
-            logger.error("Invalid environment specified: '{}'. Please use one of: {}", env, (Object[]) EnvironmentType.values());
-            throw new IllegalArgumentException("Invalid environment specified: " + env);
+            throw new IllegalArgumentException(
+                    "Invalid environment specified: '" + env + "'. Valid: " + Arrays.toString(EnvironmentType.values()), e);
         }
 
-        String propertyKey = environmentType.name().toLowerCase() + ".url";
-        String url = getProperty(propertyKey); // Will use the new priority logic
+        String propertyKey = environmentType.name().toLowerCase(Locale.ENGLISH) + ".url";
+        String url = getProperty(propertyKey);
 
         if (url == null || url.isEmpty()) {
-            throw new RuntimeException("URL for environment '" + environmentType + "' not found in config.properties for key '" + propertyKey + "'");
+            throw new IllegalStateException("URL for environment '" + environmentType + "' not found in config.properties for key '" + propertyKey + "'");
         }
         return url;
     }

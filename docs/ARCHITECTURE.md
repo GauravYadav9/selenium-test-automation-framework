@@ -31,6 +31,8 @@
   - Support for Chrome, Firefox, and Edge
   - Remote WebDriver support for Selenium Grid
   - Grid URL construction using `URI.create().toURL()` (modern Java)
+  - Native Selenium Manager for binary resolution (no third-party driver managers)
+  - Dynamic browser version targeting via `-Dbrowser.version`
 
 ### 2. Page Objects
 
@@ -185,10 +187,9 @@ ensuring centralized timeout control via `BasePage.resolveTimeout()` → `config
 
 - Selenium WebDriver 4.27.0
 - TestNG 7.10.2
-- WebDriverManager 6.1.0
 - ExtentReports 5.1.2
-- Log4j2 2.24.1
-- SLF4J 2.0.13
+- Log4j2 2.24.3
+- SLF4J 2.0.18
 - Commons IO 2.19.0
 - Gson 2.10.1
 - DataFaker 2.3.1

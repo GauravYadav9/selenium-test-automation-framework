@@ -6,6 +6,7 @@ import com.demo.flightbooking.factory.BrowserOptionsFactory;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Locale;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,15 +36,14 @@ public class DriverManager {
 
     private static final Logger logger = LogManager.getLogger(DriverManager.class);
     /**
-     * A ThreadLocal variable to store the WebDriver instance.
-     * This is the key to achieving thread safety in parallel execution.
+     * Thread-isolated WebDriver instance for parallel execution.
      */
     private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
     private static final ThreadLocal<String> browserName = new ThreadLocal<>();
 
     public static void setBrowser(String browser) {
-        logger.info("Setting browser for current thread to: {}", browser.toUpperCase());
-        browserName.set(browser.toLowerCase());
+        logger.info("Setting browser for current thread to: {}", browser != null ? browser.toUpperCase(Locale.ENGLISH) : "null");
+        browserName.set(browser != null ? browser.toLowerCase(Locale.ENGLISH) : null);
     }
 
     public static String getBrowser() {
@@ -64,7 +64,7 @@ public class DriverManager {
                     ? browserName.get()
                     : ConfigReader.getProperty("browser");
 
-            BrowserType browserType = BrowserType.valueOf(browser.toUpperCase());
+            BrowserType browserType = BrowserType.valueOf(browser.toUpperCase(Locale.ENGLISH));
             boolean isHeadless = Boolean.parseBoolean(ConfigReader.getProperty("browser.headless", "true"));
             logger.info("Headless mode enabled? {}", isHeadless);
             boolean useGrid = Boolean.parseBoolean(ConfigReader.getProperty("selenium.grid.enabled", "true"));
@@ -75,7 +75,6 @@ public class DriverManager {
 
             if (useGrid) {
                 try {
-                    // Validate required properties
                     String hubHost = ConfigReader.getProperty("selenium.hubHost", "selenium-hub");
                     String urlFormat = ConfigReader.getProperty("seleniumhub.urlFormat");
 
@@ -93,11 +92,9 @@ public class DriverManager {
 
                     driver.set(new RemoteWebDriver(gridUrl, options));
                 } catch (MalformedURLException e) {
-                    logger.error("Malformed Selenium Grid URL: {}", e.getMessage());
                     throw new IllegalStateException("Invalid Selenium Grid URL", e);
                 }
             } else {
-                // Local Mode
                 switch (browserType) {
                     case CHROME:
                         driver.set(new ChromeDriver((ChromeOptions) options));
