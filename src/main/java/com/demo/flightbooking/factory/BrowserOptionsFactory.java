@@ -3,7 +3,6 @@ package com.demo.flightbooking.factory;
 import com.demo.flightbooking.enums.BrowserType;
 import com.demo.flightbooking.utils.ConfigReader;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.MutableCapabilities;
@@ -13,8 +12,9 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 
 /**
  * Configures browser-specific capabilities.
- * In local mode, delegates driver binary resolution to WebDriverManager;
- * in Grid mode, driver management is handled by Grid nodes.
+ * Relies on native Selenium Manager (Selenium 4.6+) for local binary
+ * resolution.
+ * In Grid mode, driver management is handled by Grid nodes.
  */
 
 public class BrowserOptionsFactory {
@@ -27,8 +27,9 @@ public class BrowserOptionsFactory {
 
     /**
      * Creates browser-specific options based on browser type and headless flag.
-     * In local mode, resolves driver binaries via WebDriverManager.
+     * In local mode, relies on native Selenium Manager for binary resolution.
      * In Grid mode, skips binary resolution — Grid nodes manage their own drivers.
+     * Supports dynamic browser version targeting via {@code -Dbrowser.version}.
      *
      * @param browserType The type of browser (e.g., CHROME, FIREFOX).
      * @param isHeadless  Whether the browser should run in headless mode.
@@ -37,55 +38,43 @@ public class BrowserOptionsFactory {
 
     public static MutableCapabilities getOptions(BrowserType browserType, boolean isHeadless) {
 
-        logger.info("Headless mode for {}: {}", browserType, isHeadless);
-
-        boolean useGrid = Boolean.parseBoolean(ConfigReader.getProperty("selenium.grid.enabled", "true"));
+        logger.info("Configuring capabilities for {} (Headless: {})", browserType, isHeadless);
+        String browserVersion = ConfigReader.getProperty("browser.version");
+        if (browserVersion != null && !browserVersion.isEmpty()) {
+            logger.info("Targeting specific {} version: {}", browserType, browserVersion);
+        }
 
         switch (browserType) {
             case CHROME:
-                if (!useGrid) {
-                    WebDriverManager.chromedriver().setup();
-                }
                 ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.addArguments("--start-maximized");
-                chromeOptions.addArguments("--disable-gpu");
-                chromeOptions.addArguments("--remote-allow-origins=*");
-
+                chromeOptions.addArguments("--start-maximized", "--disable-gpu", "--remote-allow-origins=*");
                 if (isHeadless) {
-                    logger.info("Enabling headless mode for CHROME");
-                    chromeOptions.addArguments("--headless=new");
-                    chromeOptions.addArguments("--window-size=1920,1080");
+                    chromeOptions.addArguments("--headless=new", "--window-size=1920,1080");
                 }
-
+                if (browserVersion != null && !browserVersion.isEmpty()) {
+                    chromeOptions.setBrowserVersion(browserVersion);
+                }
                 return chromeOptions;
 
             case FIREFOX:
-                if (!useGrid) {
-                    WebDriverManager.firefoxdriver().setup();
-                }
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
-
                 if (isHeadless) {
-                    logger.info("Enabling headless mode for FIREFOX");
-                    firefoxOptions.addArguments("--headless");
-                    firefoxOptions.addArguments("--width=1920");
-                    firefoxOptions.addArguments("--height=1080");
+                    firefoxOptions.addArguments("--headless", "--width=1920", "--height=1080");
+                }
+                if (browserVersion != null && !browserVersion.isEmpty()) {
+                    firefoxOptions.setBrowserVersion(browserVersion);
                 }
                 return firefoxOptions;
 
             case EDGE:
-                if (!useGrid) {
-                    WebDriverManager.edgedriver().setup();
-                }
                 EdgeOptions edgeOptions = new EdgeOptions();
                 edgeOptions.addArguments("--start-maximized");
-
                 if (isHeadless) {
-                    logger.info("Enabling headless mode for EDGE");
-                    edgeOptions.addArguments("--headless=new");
-                    edgeOptions.addArguments("--window-size=1920,1080");
+                    edgeOptions.addArguments("--headless=new", "--window-size=1920,1080");
                 }
-
+                if (browserVersion != null && !browserVersion.isEmpty()) {
+                    edgeOptions.setBrowserVersion(browserVersion);
+                }
                 return edgeOptions;
 
             default:
