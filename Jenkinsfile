@@ -1,4 +1,4 @@
-@Library('jenkins-pipeline-library@v1.3.2') _
+@Library('jenkins-pipeline-library@v1.4.0') _
 
 def branchConfig = getBranchConfig()
 
@@ -42,6 +42,19 @@ options {
             steps {
                 script {
                     env.SUITE_TO_RUN = determineTestSuite()
+                }
+            }
+        }
+        
+        stage('Build Agent Image') {
+            when {
+                expression { return env.BRANCH_NAME in branchConfig.pipelineBranches }
+            }
+            agent any
+            steps {
+                checkout scm
+                script {
+                    buildAgentImage()
                 }
             }
         }
