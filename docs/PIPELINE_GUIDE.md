@@ -135,7 +135,9 @@ Dependency caching is enforced by a custom `settings.xml` file with an `<updateP
 
 ### When to Rebuild the Pre-warmed Image
 
-The pre-warmed Docker image must be rebuilt to keep the cache up to date. Rebuild the image after:
+The pipeline automatically detects when a rebuild is needed via `buildAgentImage()` from the shared library. It triggers a rebuild when any of these files change: `pom.xml`, `cicd/Dockerfile`, `cicd/Dockerfile-prewarmed`, or `cicd/settings.xml`. It also self-heals by rebuilding if the image is missing from the Docker host.
+
+For manual rebuilds (e.g., during local development), rebuild after:
 
 1. Adding, removing, or updating any dependencies in the `pom.xml`.
 2. Changing system-level tools in the base Dockerfile.
@@ -188,8 +190,8 @@ The following credential IDs must be available in Jenkins for the pipeline to fu
 #### 2. Dependency Resolution Issues
 
 - **Symptom**: The build fails with a "dependency not found" error.
-- **Explanation**: The `pom.xml` was likely updated with a new dependency, but the pre-warmed Docker image was not rebuilt.
-- **Solution**: Rebuild the `flight-booking-agent-prewarmed:latest` image and re-run the build.
+- **Explanation**: The `pom.xml` was likely updated with a new dependency, but the pre-warmed Docker image was not rebuilt. Note: The pipeline's `buildAgentImage()` stage should catch this automatically on the next run if `pom.xml` is in the changeset.
+- **Solution**: If the automatic rebuild did not trigger (e.g., first build on a new agent), manually rebuild the `flight-booking-agent-prewarmed:latest` image and re-run the build.
 
 #### 3. Test Failures on Protected Branches
 
@@ -217,7 +219,7 @@ The following credential IDs must be available in Jenkins for the pipeline to fu
 
 ## 9. Best Practices
 
-1. **Keep the Pre-warmed Image Up to Date**: Always rebuild the image after `pom.xml` dependency changes.
+1. **Keep the Pre-warmed Image Up to Date**: The pipeline automates this via `buildAgentImage()`, but verify manually after major dependency overhauls.
 2. **Run Tests Locally First**: Catch issues early before pushing code.
 3. **Rebase Feature Branches Regularly**: Keep branches updated to avoid large merge conflicts.
 4. **Monitor Test Flakiness**: Investigate and fix tests that fail intermittently.

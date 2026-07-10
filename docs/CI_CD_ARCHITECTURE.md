@@ -94,6 +94,7 @@ Reports + Dashboards + Notifications
 ### Pipeline Responsibilities
 
 * Determine suite to run (smoke / regression)
+* Conditionally rebuild agent image (if dependencies/Dockerfile changed)
 * Apply branch-based execution rules
 * Start and validate Selenium Grid
 * Run tests in **parallel browsers**
@@ -203,22 +204,23 @@ Two layered Docker images:
 
 ## 9. Test Execution Flow
 
-1. Jenkins spins up pre-warmed agent
-2. Selenium Grid is started and validated
-3. Tests execute in parallel:
+1. Conditional agent image rebuild (skipped if no dependency/Dockerfile changes detected)
+2. Jenkins spins up pre-warmed agent
+3. Selenium Grid is started and validated
+4. Tests execute in parallel:
 
    * Chrome
    * Firefox
 
    Parallelism is at the Jenkins pipeline stage level — each browser runs in its own Docker container simultaneously.
 
-4. Each browser:
+5. Each browser:
 
    * Uses its own workspace (`main` and `main@2`)
    * Generates isolated reports and surefire XMLs
    * Surefire reports are isolated per browser via POM binding (`-Dsurefire.reportsDirectory=target/{browser}/surefire-reports`) with OS-level bash `mv` as a defense-in-depth safety net
    * Logs are renamed per browser (`chrome-automation.log`, `firefox-automation.log`) before stashing
-5. Results are stashed, unstashed, and aggregated:
+6. Results are stashed, unstashed, and aggregated:
    * Surefire XMLs exist at distinct paths — no overwrite collision
    * Per-browser logs are concatenated into a single `automation.log` for AI analysis context
 
