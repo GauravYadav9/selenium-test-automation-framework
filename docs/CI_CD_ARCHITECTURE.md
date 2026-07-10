@@ -108,7 +108,7 @@ Reports + Dashboards + Notifications
 Reusable pipeline logic is extracted into shared library functions:
 
 **Versioning Strategy:**
-- Production Jenkinsfile uses: `@Library('jenkins-pipeline-library@v1.3.2') _`
+- Production Jenkinsfile uses: `@Library('jenkins-pipeline-library@v1.4.0') _`
 - Feature branches can test latest: `@Library('jenkins-pipeline-library@main') _`
 - Shared library is versioned using semantic versioning (vMAJOR.MINOR.PATCH)
 - Tags ensure deterministic builds and instant rollback capability
@@ -117,6 +117,7 @@ Reusable pipeline logic is extracted into shared library functions:
 | ------------------------- | ----------------------------------------------- |
 | `getBranchConfig()`       | Branch policies (main, feature, prod-candidate) |
 | `determineTestSuite()`    | Decide smoke vs regression                      |
+| `buildAgentImage()`       | Conditional Docker agent image rebuild (skip if unchanged, self-heal if missing) |
 | `printBuildMetadata()`    | Log build metadata (suite, branch, trigger)     |
 | `startDockerGrid()`       | Start + health-check Selenium Grid              |
 | `stopDockerGrid()`        | Safe cleanup                                    |

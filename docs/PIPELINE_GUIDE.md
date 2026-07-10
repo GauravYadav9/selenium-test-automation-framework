@@ -28,15 +28,16 @@ This document outlines the policies, behaviors, and operational procedures for t
 ### Pipeline Execution Flow
 
 1. **Determine Suite** — Selects smoke or regression based on branch and parameters
-2. **Initialize & Start Grid** — Creates isolated Docker network, starts Selenium Grid, validates health
-3. **Approval Gate** — Optional manual approval for regression on protected branches
-4. **Parallel Tests** — Chrome and Firefox execute simultaneously in separate containers
-5. **Artifact Isolation** — Per-browser surefire reports are isolated (POM binding + bash mv); per-browser logs are renamed and stashed
-6. **Report Aggregation** — Surefire XMLs from both browsers are unstashed to distinct paths; per-browser logs are concatenated into a single `automation.log` for AI context
-7. **Quality Gate** — Evaluates aggregated test results against threshold
-8. **AI Analysis** — Optional, non-blocking failure analysis (branch-gated)
-9. **Notifications** — Email sent on status changes; Qase results published
-10. **Cleanup** — Grid shutdown, container removal, workspace cleanup (guaranteed)
+2. **Build Agent Image** — Conditionally rebuilds the Docker agent image if dependency or Dockerfile changes are detected; skips if current
+3. **Initialize & Start Grid** — Creates isolated Docker network, starts Selenium Grid, validates health
+4. **Approval Gate** — Optional manual approval for regression on protected branches
+5. **Parallel Tests** — Chrome and Firefox execute simultaneously in separate containers
+6. **Artifact Isolation** — Per-browser surefire reports are isolated (POM binding + bash mv); per-browser logs are renamed and stashed
+7. **Report Aggregation** — Surefire XMLs from both browsers are unstashed to distinct paths; per-browser logs are concatenated into a single `automation.log` for AI context
+8. **Quality Gate** — Evaluates aggregated test results against threshold
+9. **AI Analysis** — Optional, non-blocking failure analysis (branch-gated)
+10. **Notifications** — Email sent on status changes; Qase results published
+11. **Cleanup** — Grid shutdown, container removal, workspace cleanup (guaranteed)
 
 ## 3. Pipeline Features
 
