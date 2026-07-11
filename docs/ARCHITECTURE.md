@@ -96,7 +96,7 @@
 - **Location**: `src/main/java/com/demo/flightbooking/utils/`
 - **Components**:
   - `ConfigReader`: Priority-based configuration (System property → config file → default)
-  - `DriverManager`: WebDriver lifecycle and thread-safe management via `ThreadLocal`
+  - `DriverManager`: WebDriver lifecycle and thread-safe management via `ThreadLocal`. Browser selection resolved through `ConfigReader` (same priority hierarchy as all other config)
   - `ExtentManager`: Thread-safe ExtentReports management via `ThreadLocal`
   - `MaskingUtil`: Data masking for sensitive fields (card numbers, passwords) in logs
   - `ScreenshotUtils`: Thread-safe screenshot capture with thread ID in filenames

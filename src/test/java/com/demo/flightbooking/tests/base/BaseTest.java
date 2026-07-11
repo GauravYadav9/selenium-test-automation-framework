@@ -26,6 +26,11 @@ import com.demo.flightbooking.utils.ExtentManager;
  * The base class for all test classes in the framework.
  * It handles the setup and teardown of essential components like WebDriver,
  * ExtentReports, and logging, ensuring a consistent test execution lifecycle.
+ *
+ * BaseTest is strictly a lifecycle manager — it does NOT dictate configuration.
+ * Browser resolution is delegated entirely to ConfigReader via DriverManager.
+ * BaseTest only reads the resolved browser name for MDC context and report
+ * labeling.
  */
 public class BaseTest {
 
@@ -60,7 +65,7 @@ public class BaseTest {
     }
 
     /**
-     * Runs once per <test> tag in testng XML.
+     * Runs once per {@literal <test>} tag in testng XML.
      * Creates a unique ExtentSparkReporter per browser/stage.
      */
     @BeforeClass(alwaysRun = true)
@@ -68,11 +73,11 @@ public class BaseTest {
         if (extentReports.get() == null) {
             Logger classLogger = LogManager.getLogger(this.getClass());
 
-            // Get browser from system property (set by Jenkins Maven command)
-            String browser = System.getProperty("browser", "chrome").toUpperCase();
+            // Read browser from ConfigReader for report labeling only
+            String browser = ConfigReader.getProperty("browser", "chrome").toUpperCase();
 
             // Determine suite and report directory (e.g., chrome or firefox)
-            String reportDir = System.getProperty("report.dir", browser.toLowerCase()); // fallback to browser
+            String reportDir = System.getProperty("report.dir", browser.toLowerCase());
             String suiteName = System.getProperty("test.suite", "default");
 
             String reportPath = "reports/" + reportDir + "/";
@@ -102,19 +107,20 @@ public class BaseTest {
     /**
      * This method runs before each test method.
      * It initializes the WebDriver instance for the current thread and creates a
-     * new
-     * test entry in the ExtentReport.
-     * 
+     * new test entry in the ExtentReport.
+     *
      * @param method The test method that is about to be run.
      */
     @BeforeMethod(alwaysRun = true)
     public void setUp(Method method) {
-        // ROBUST MDC: Set context for THIS test method's thread
-        String mdcSuite = System.getProperty("test.suite", "unknown");
+        // Resolve suite name — CI sets -Dtest.suite, local runs fall back to class name
+        String mdcSuite = System.getProperty("test.suite");
+        if (mdcSuite == null || mdcSuite.isBlank()) {
+            mdcSuite = method.getDeclaringClass().getSimpleName();
+        }
 
-        // Get browser from system property (set by Jenkins Maven command)
-        String browser = System.getProperty("browser", "chrome").toUpperCase();
-        String mdcBrowser = (browser != null && !browser.isBlank()) ? browser : "UNKNOWN";
+        // Read browser from ConfigReader for MDC context and report labeling only
+        String browser = ConfigReader.getProperty("browser", "chrome").toUpperCase();
 
         // Set thread name for log4j %X{thread} pickup
         String customThreadName = "TestNG-test-" + mdcSuite.toLowerCase() + "-" + browser.toLowerCase() + "-"
@@ -123,19 +129,16 @@ public class BaseTest {
 
         // Set MDC context for THIS thread
         ThreadContext.put("suite", mdcSuite.toUpperCase());
-        ThreadContext.put("browser", mdcBrowser);
+        ThreadContext.put("browser", browser);
         ThreadContext.put("testname", method.getName());
-
-        DriverManager.setBrowser(browser.toLowerCase());
 
         Logger methodLogger = LogManager.getLogger(this.getClass());
         methodLogger.info("Browser set to: {} for test: {}", browser, method.getName());
 
-        String browserName = DriverManager.getBrowser().toUpperCase();
-        // Create a test entry in report
-        ExtentTest test = extentReports.get().createTest(method.getName() + " - " + browserName);
+        // Create a test entry in report with browser label
+        ExtentTest test = extentReports.get().createTest(method.getName() + " - " + browser);
         ExtentManager.setTest(test);
-        methodLogger.info("ExtentTest created for test: {} on {}", method.getName(), browserName);
+        methodLogger.info("ExtentTest created for test: {} on {}", method.getName(), browser);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -164,7 +167,7 @@ public class BaseTest {
     }
 
     /**
-     * Runs once per <test> tag completion.
+     * Runs once per {@literal <test>} tag completion.
      * Flushes report and writes failure summary.
      */
     @AfterClass(alwaysRun = true)
@@ -177,7 +180,6 @@ public class BaseTest {
         }
 
         // Write failure summary for reporting/CI visibility
-
         String suiteName = System.getProperty("test.suite", "default");
         String mergedSummaryFile = "reports/" + suiteName + "-failure-summary.txt";
 

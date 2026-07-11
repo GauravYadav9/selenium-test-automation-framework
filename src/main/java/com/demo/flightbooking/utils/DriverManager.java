@@ -27,6 +27,13 @@ import org.openqa.selenium.remote.RemoteWebDriver;
  * This class ensures that each test thread gets its own separate WebDriver
  * instance,
  * preventing conflicts and instability during parallel runs.
+ *
+ * Browser selection is resolved via ConfigReader (System Property → config file
+ * → default),
+ * keeping DriverManager consistent with how every other config property is
+ * resolved.
+ * Browser isolation in CI is per-JVM (separate Maven processes per browser),
+ * not per-thread.
  */
 public class DriverManager {
 
@@ -35,34 +42,24 @@ public class DriverManager {
     }
 
     private static final Logger logger = LogManager.getLogger(DriverManager.class);
+
     /**
      * Thread-isolated WebDriver instance for parallel execution.
      */
     private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
-    private static final ThreadLocal<String> browserName = new ThreadLocal<>();
-
-    public static void setBrowser(String browser) {
-        logger.info("Setting browser for current thread to: {}", browser != null ? browser.toUpperCase(Locale.ENGLISH) : "null");
-        browserName.set(browser != null ? browser.toLowerCase(Locale.ENGLISH) : null);
-    }
-
-    public static String getBrowser() {
-        return browserName.get();
-    }
 
     /**
      * Retrieves the WebDriver instance for the current thread.
      * If an instance does not exist, it creates a new one based on the
-     * configuration in config.properties (e.g., browser type, grid enabled,
-     * headless mode).
+     * configuration resolved through ConfigReader (e.g., browser type, grid
+     * enabled, headless mode).
      *
      * @return The WebDriver instance for the current thread.
      */
     public static WebDriver getDriver() {
         if (driver.get() == null) {
-            String browser = browserName.get() != null
-                    ? browserName.get()
-                    : ConfigReader.getProperty("browser");
+            // ConfigReader handles the resolution: -Dbrowser=x → config.properties → "chrome"
+            String browser = ConfigReader.getProperty("browser", "chrome");
 
             BrowserType browserType = BrowserType.valueOf(browser.toUpperCase(Locale.ENGLISH));
             boolean isHeadless = Boolean.parseBoolean(ConfigReader.getProperty("browser.headless", "true"));
@@ -82,7 +79,8 @@ public class DriverManager {
                         throw new IllegalStateException("Missing hubHost or urlFormat in config.properties");
                     }
                     if (urlFormat == null || urlFormat.isEmpty()) {
-                        throw new IllegalStateException("seleniumhub.urlFormat property is missing in config.properties");
+                        throw new IllegalStateException(
+                                "seleniumhub.urlFormat property is missing in config.properties");
                     }
 
                     String fullUrl = String.format(urlFormat, hubHost);
@@ -134,7 +132,6 @@ public class DriverManager {
         } finally {
             ThreadContext.remove("browser");
             driver.remove();
-            browserName.remove();
         }
     }
 }
