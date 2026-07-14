@@ -9,17 +9,17 @@ import org.openqa.selenium.WebDriver;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
- * A utility class for capturing screenshots of the browser.
- * This is crucial for debugging test failures, as it provides a visual
- * record of the application's state at the moment of failure.
+ * Utility class for capturing browser screenshots.
  */
 public class ScreenshotUtils {
 
     private static final Logger logger = LogManager.getLogger(ScreenshotUtils.class);
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS");
     private static final String SCREENSHOT_DIR = "reports/screenshots/";
 
     private ScreenshotUtils() {
@@ -43,8 +43,8 @@ public class ScreenshotUtils {
                     "Failed to create screenshot directory: " + SCREENSHOT_DIR);
         }
 
-        String browser = System.getProperty("browser", "unknown");
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
+        String browser = ConfigReader.getProperty("browser", "chrome");
+        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
         String threadId = String.valueOf(Thread.currentThread().threadId());
         String fileName = browser + "_" + testName + "_" + timestamp + "_" + threadId + ".png";
         String relativePath = "screenshots/" + fileName;

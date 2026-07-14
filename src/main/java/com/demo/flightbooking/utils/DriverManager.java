@@ -22,16 +22,11 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 /**
- * Manages the WebDriver instance in a thread-safe manner for parallel test
- * execution.
- * This class ensures that each test thread gets its own separate WebDriver
- * instance,
- * preventing conflicts and instability during parallel runs.
+ * Thread-safe WebDriver instance for parallel execution.
  *
- * Browser selection is resolved via ConfigReader (System Property → config file
- * → default),
- * keeping DriverManager consistent with how every other config property is
- * resolved.
+ * Browser selection is resolved through ConfigReader
+ * (System Property → configuration file → default).
+ *
  * Browser isolation in CI is per-JVM (separate Maven processes per browser),
  * not per-thread.
  */
@@ -47,6 +42,25 @@ public class DriverManager {
      * Thread-isolated WebDriver instance for parallel execution.
      */
     private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+
+    /**
+     * Returns true if the current thread already owns a WebDriver.
+     * Unlike getDriver(), this method never creates a new browser session.
+     */
+    public static boolean hasDriver() {
+        return driver.get() != null;
+    }
+
+    /**
+     * Returns the existing WebDriver for the current thread without
+     * triggering lazy initialization.
+     *
+     * Intended for teardown/reporting code where creating a new browser
+     * session would be incorrect.
+     */
+    public static WebDriver getExistingDriver() {
+        return driver.get();
+    }
 
     /**
      * Retrieves the WebDriver instance for the current thread.
@@ -108,17 +122,16 @@ public class DriverManager {
                 }
             }
 
-            driver.get().manage().window().maximize();
+            if (!isHeadless) {
+                driver.get().manage().window().maximize();
+            }
         }
 
         return driver.get();
     }
 
     /**
-     * Quits the WebDriver instance for the current thread and removes it from the
-     * ThreadLocal variable.
-     * This is crucial for cleaning up resources and preventing memory leaks after a
-     * test is complete.
+     * Quits the WebDriver instance and removes the ThreadLocal reference.
      */
     public static void quitDriver() {
         WebDriver wd = driver.get();

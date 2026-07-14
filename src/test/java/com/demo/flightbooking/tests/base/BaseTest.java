@@ -146,8 +146,8 @@ public class BaseTest {
         // Use logger after MDC is still set (cleared at the end)
         Logger methodLogger = LogManager.getLogger(this.getClass());
 
-        // The TestListener is now 100% responsible for all report logging.
-        // This method is ONLY for cleanup and failure summaries for Jenkins.
+        // Report logging is handled by TestListener.
+        // BaseTest is responsible for cleanup and CI failure summaries.
 
         // Add failure to summary for Jenkins email/dashboard (TestListener handles
         // ExtentReports)

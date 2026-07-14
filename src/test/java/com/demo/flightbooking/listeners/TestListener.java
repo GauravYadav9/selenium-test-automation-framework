@@ -51,13 +51,12 @@ public class TestListener implements ITestListener, IAnnotationTransformer {
 
 	@Override
 	public void onTestFailure(ITestResult result) {
-		// Check if retry analyzer will retry this failure — suppress intermediate
-		// reports
+		// Check if retry analyzer will retry this failure — suppress intermediate reports
 		Object analyzer = result.getMethod().getRetryAnalyzer(result);
-		if (analyzer instanceof RetryAnalyzer retryAnalyzer) {
-			if (retryAnalyzer.willRetry(result)) {
-				return; // Suppress intermediate failure — only report final attempt
-			}
+
+		if (analyzer instanceof RetryAnalyzer retryAnalyzer
+				&& retryAnalyzer.willRetry(result)) {
+			return; // Suppress intermediate failure — only report final attempt
 		}
 
 		// Only process final failures (after all retries exhausted)
@@ -66,20 +65,27 @@ public class TestListener implements ITestListener, IAnnotationTransformer {
 			test.log(Status.FAIL, "Test failed: " + result.getThrowable());
 		}
 
-		// Only capture screenshot for final failures
+		// Capture screenshot only if an existing WebDriver session is available
 		try {
-			WebDriver driver = DriverManager.getDriver(); // use thread-local driver
-			if (driver != null) {
-				String screenshotPath = ScreenshotUtils.captureScreenshot(driver, result.getMethod().getMethodName());
+			if (DriverManager.hasDriver()) {
+				WebDriver driver = DriverManager.getExistingDriver();
+
+				String screenshotPath = ScreenshotUtils.captureScreenshot(
+						driver,
+						result.getMethod().getMethodName());
+
 				if (test != null) {
-					test.addScreenCaptureFromPath("../screenshots/" + new java.io.File(screenshotPath).getName());
+					test.addScreenCaptureFromPath(
+							"../screenshots/" + new java.io.File(screenshotPath).getName());
 				}
 			} else if (test != null) {
-				test.log(Status.WARNING, "Driver was null; skipping screenshot.");
+				test.log(Status.WARNING,
+						"No active WebDriver session available; screenshot capture skipped.");
 			}
 		} catch (Exception e) {
 			if (test != null) {
-				test.log(Status.WARNING, "Screenshot capture failed: " + e.getMessage());
+				test.log(Status.WARNING,
+						"Screenshot capture failed: " + e.getMessage());
 			}
 		}
 	}
