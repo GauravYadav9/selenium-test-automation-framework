@@ -25,7 +25,7 @@
 ### 1. Driver Management
 
 - **Location**: `src/main/java/com/demo/flightbooking/utils/DriverManager.java`, `src/main/java/com/demo/flightbooking/factory/BrowserOptionsFactory.java`
-- **Responsibility**: Manages WebDriver lifecycle
+- **Responsibility**: Manages WebDriver lifecycle.
 - **Key Features**:
   - Thread-safe WebDriver instances via `ThreadLocal<WebDriver>`
   - Support for Chrome, Firefox, and Edge
@@ -33,6 +33,9 @@
   - Grid URL construction using `URI.create().toURL()` (modern Java)
   - Native Selenium Manager for binary resolution (no third-party driver managers)
   - Dynamic browser version targeting via `-Dbrowser.version`
+  - **Single Source of Truth (SSOT):** Browser configuration is resolved through `ConfigReader` using the framework's priority hierarchy.
+  - **Command-Query Separation (CQS):** `hasDriver()` and `getExistingDriver()` allow reporting and listener components to safely inspect the current WebDriver without triggering lazy initialization.
+  - **Separation of Responsibilities:** Browser capabilities (including headless execution and window sizing) are configured by `BrowserOptionsFactory`, while visible browser window management is handled by `DriverManager`.
 
 ### 2. Page Objects
 
@@ -96,15 +99,15 @@
 - **Location**: `src/main/java/com/demo/flightbooking/utils/`
 - **Components**:
   - `ConfigReader`: Priority-based configuration (System property → config file → default)
-  - `DriverManager`: WebDriver lifecycle and thread-safe management via `ThreadLocal`. Browser selection resolved through `ConfigReader` (same priority hierarchy as all other config)
-  - `ExtentManager`: Thread-safe ExtentReports management via `ThreadLocal`
+  - `DriverManager`: Thread-safe WebDriver lifecycle management via `ThreadLocal`. Browser selection is resolved through `ConfigReader` using the framework's configuration priority hierarchy.
+  - `ExtentManager`: Thread-safe `ExtentTest` management via `ThreadLocal`
   - `MaskingUtil`: Data masking for sensitive fields (card numbers, passwords) in logs
-  - `ScreenshotUtils`: Thread-safe screenshot capture with thread ID in filenames
+  - `ScreenshotUtils`: Thread-safe screenshot capture with browser-aware filenames and unique timestamps
   - `WebDriverUtils`: Centralized element interaction with explicit wait strategies
 
-WebDriverUtils follows an instance-based interaction model.
-Page Objects delegate all waits and interactions to WebDriverUtils,
-ensuring centralized timeout control via `BasePage.resolveTimeout()` → `config.properties`.
+- `WebDriverUtils` follows an instance-based interaction model.
+- Page Objects delegate all waits and interactions to `WebDriverUtils`.
+- Centralized timeout control flows through `BasePage.resolveTimeout()` → `config.properties`.
 
 ### 7. AI Augmentation Layer
 
@@ -137,10 +140,11 @@ ensuring centralized timeout control via `BasePage.resolveTimeout()` → `config
 
 - Creates browser-specific capabilities via `BrowserOptionsFactory`
 
-### 3. Singleton Pattern
+### 3. Static Utility & Thread-Local Management
 
 - `ConfigReader`: Static block initialization with priority-based property lookup
-- `ExtentManager`: Thread-safe report management
+- `ExtentManager`: Static thread-local manager for `ExtentTest` instances
+- `DriverManager`: Static thread-local manager for `WebDriver` instances
 
 ### 4. Strategy Pattern
 

@@ -10,7 +10,7 @@ This document outlines the policies, behaviors, and operational procedures for t
 
 - **main**: Production branch. All code must pass review and regression tests before merging.
 - **enhancements**: A pre-production branch for integrating major features.
-- **feature/***: Standard branches for developing new features.
+- **feature/*** **and** **bugfix/***: Short-lived branches for isolated feature development and defect fixes before integration into `enhancements`.
 
 ### Build Failure Conditions
 

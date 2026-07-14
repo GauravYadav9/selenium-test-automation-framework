@@ -7,7 +7,7 @@ A robust Selenium test automation framework designed for end-to-end testing of a
 ### Core Framework
 - Page Object Model (POM) with composition pattern
 - Modular layered architecture (Infrastructure → Domain → Test)
-- Centralized WebDriver utilities with instance-based interaction model
+- Centralized WebDriver interaction utilities with configuration-driven explicit wait strategy
 - Configuration-driven wait and timeout strategy (no hardcoded waits in Page Objects)
 - Comprehensive Log4j2 logging with MDC context
 

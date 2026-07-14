@@ -79,7 +79,7 @@ entries, masks sensitive data, and generates a structured failure analysis repor
 | `AiFailureAnalyzer` | Orchestrator — walks workspace for all Surefire XMLs, aggregates failures across browsers, filters logs, calls LLM, writes report |
 | `FailureAnalysisService` | LangChain4j service interface — 7-section analysis prompt |
 | `FailureAnalysisRunner` | CLI entry point (also invoked by Jenkins shared library via `mvn exec:java`) |
-| `AiFailureAnalyzerTest` | Unit tests with mock model |
+| `AiFailureAnalyzerTest` | Unit tests with a stub `ChatModel`; verifies XML extraction without LLM dependency |
 
 ---
 

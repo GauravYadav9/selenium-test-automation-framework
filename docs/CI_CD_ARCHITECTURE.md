@@ -218,7 +218,8 @@ Two layered Docker images:
 
    * Uses its own workspace (`main` and `main@2`)
    * Generates isolated reports and surefire XMLs
-   * Surefire reports are isolated per browser via POM binding (`-Dsurefire.reportsDirectory=target/{browser}/surefire-reports`) with OS-level bash `mv` as a defense-in-depth safety net
+   * Surefire reports are isolated per browser via POM binding (-Dsurefire.reportsDirectory=target/{browser}/surefire-reports),
+     with an OS-level bash mv step providing an additional safety net should report routing differ across environments.
    * Logs are renamed per browser (`chrome-automation.log`, `firefox-automation.log`) before stashing
 6. Results are stashed, unstashed, and aggregated:
    * Surefire XMLs exist at distinct paths — no overwrite collision
