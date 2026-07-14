@@ -4,6 +4,10 @@ import com.demo.flightbooking.utils.MaskingUtil;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
+
 /**
  * Unit tests for AI Failure Analyzer components.
  *
@@ -12,6 +16,19 @@ import org.testng.Assert;
  * LLM response quality is validated via FailureAnalysisRunner, not here.
  */
 public class AiFailureAnalyzerTest {
+
+    /**
+     * Test stub used to ensure XML extraction tests remain independent of LLM execution.
+     * Any unexpected AI invocation fails immediately.
+     */
+    private static final ChatModel DUMMY_MODEL = new ChatModel() {
+
+        @Override
+        public ChatResponse doChat(ChatRequest chatRequest) {
+            throw new UnsupportedOperationException(
+                    "LLM should never be invoked during XML extraction tests.");
+        }
+    };
 
     // =====================================================================
     // MaskingUtil.maskLogContent() Tests
@@ -104,14 +121,7 @@ public class AiFailureAnalyzerTest {
             <testng-results skipped="1" failed="2" ignored="0" total="10" passed="7">
             </testng-results>
             """;
-			
-        AiFailureAnalyzer analyzer = new AiFailureAnalyzer(
-                // Model not used in extraction tests
-                dev.langchain4j.model.ollama.OllamaChatModel.builder()
-                        .baseUrl("http://localhost:11434")
-                        .modelName("llama3.2")
-                        .build()
-        );
+        AiFailureAnalyzer analyzer = new AiFailureAnalyzer(DUMMY_MODEL);
 
         Assert.assertEquals(analyzer.extractAttribute(xml, "total"), 10);
         Assert.assertEquals(analyzer.extractAttribute(xml, "passed"), 7);
@@ -123,12 +133,7 @@ public class AiFailureAnalyzerTest {
     public void testExtractAttribute_missingAttribute() {
         String xml = "<testng-results total=\"5\"></testng-results>";
 
-        AiFailureAnalyzer analyzer = new AiFailureAnalyzer(
-                dev.langchain4j.model.ollama.OllamaChatModel.builder()
-                        .baseUrl("http://localhost:11434")
-                        .modelName("llama3.2")
-                        .build()
-        );
+        AiFailureAnalyzer analyzer = new AiFailureAnalyzer(DUMMY_MODEL);
 
         Assert.assertEquals(analyzer.extractAttribute(xml, "nonexistent"), 0,
                 "Missing attribute should return 0");
