@@ -3,11 +3,10 @@ package com.demo.flightbooking.model;
 import com.demo.flightbooking.utils.MaskingUtil;
 
 /**
- * A data model representing a passenger and their booking details.
- * This is a Java Record, a modern way to create immutable data-carrier classes.
+ * Represents an immutable passenger booking.
  *
- * SECURITY: The toString() method is explicitly overridden to mask sensitive data
- * like credit card numbers to prevent accidental exposure in logs and reports.
+ * The overridden toString() masks sensitive fields before logging
+ * to prevent accidental exposure of payment information.
  */
 public record Passenger(
     String origin,

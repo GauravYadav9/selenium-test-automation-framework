@@ -1,9 +1,7 @@
 package com.demo.flightbooking.utils;
 
 /**
- * Utility class for masking sensitive data to prevent exposure in logs and reports.
- * This is critical for compliance with regulations like PCI DSS and GDPR.
- * The class is final to prevent extension, as it only contains static methods.
+ * Utility methods for masking sensitive data before logging or reporting.
  */
 public final class MaskingUtil {
 
@@ -68,9 +66,9 @@ public final class MaskingUtil {
      * - CVV/CVC patterns (3-4 digits following cvv/cvc keywords)
      * - API keys and tokens (long alphanumeric strings following key/token/secret keywords)
      *
-     * Design decision: We prefer over-masking over the risk of data exposure.
-     * Our log timestamps use separators (2026-04-06 16:14:38.417) so they
-     * don't match \b\d{13,19}\b. False positives are rare in practice.
+     * Note:
+     * The implementation favors over-masking rather than risking
+     * accidental exposure of sensitive data.
      *
      * @param logContent Raw log text to mask.
      * @return Log text with sensitive patterns replaced, or null/empty if input is null/empty.

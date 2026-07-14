@@ -19,15 +19,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Professional grade retry analyzer for TestNG that intelligently retries only
- * infrastructure/timing issues while avoiding retries for genuine application
- * bugs.
- *
- * Features:
- * - Type-safe exception checking with inheritance support
- * - Cause chain traversal for wrapped exceptions
- * - Per-invocation retry tracking (handles DataProvider scenarios)
- * - Thread-safe implementation
+ * Retry analyzer that retries transient infrastructure and timing failures
+ * while avoiding retries for application defects.
  */
 public class RetryAnalyzer implements IRetryAnalyzer {
 
@@ -183,7 +176,7 @@ public class RetryAnalyzer implements IRetryAnalyzer {
     }
 
     /**
-     * Professional logging for retry decisions
+     * Logs retry decisions
      */
     private void logDecision(String testMethod, String exceptionType, int attemptCount, String reason) {
         String status = attemptCount > 0 ? "RETRY" : "SKIP";
@@ -192,7 +185,7 @@ public class RetryAnalyzer implements IRetryAnalyzer {
     }
 
     /**
-     * Professional logging for final failure decisions
+     * Logs final retry decisions
      */
     private void logFailure(String testMethod, String exceptionType, String reason) {
         logger.error("[{}] Not retrying - {}: {}", testMethod, reason, exceptionType);
