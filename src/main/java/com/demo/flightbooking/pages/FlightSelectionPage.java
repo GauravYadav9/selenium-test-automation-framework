@@ -60,8 +60,9 @@ public class FlightSelectionPage extends BasePage {
      *         if no prices are found.
      */
     public Optional<Double> getLowestFlightPrice() {
-        logger.info("Finding the lowest flight price on the page using Streams.");
-        return driver.findElements(flightRows).stream()
+        logger.info("Finding the lowest flight price from the flight results.");
+
+        return webDriverUtils.findElements(flightRows).stream()
                 .map(row -> row.findElement(priceCell).getText())
                 .map(priceText -> priceText.replace("$", ""))
                 .map(Double::parseDouble)

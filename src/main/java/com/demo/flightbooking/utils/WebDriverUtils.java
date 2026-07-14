@@ -31,15 +31,16 @@ public class WebDriverUtils {
             "creditcardnumber", "cardnumber", "cvv", "ssn", "password");
 
     /**
-     * Constructor for WebDriverUtils.
-     * Initializes the WebDriverWait with a timeout defined in the config file.
+     * Creates a WebDriver utility wrapper using the supplied WebDriver instance
+     * and explicit wait timeout.
      *
      * @param driver The WebDriver instance.
+     * @param timeoutSeconds Explicit wait timeout in seconds.
      */
     public WebDriverUtils(WebDriver driver, int timeoutSeconds) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
-        this.logger = LogManager.getLogger(WebDriverUtils.class); // Logger for this utility class
+        this.logger = LogManager.getLogger(WebDriverUtils.class);
     }
 
     /**
@@ -59,8 +60,7 @@ public class WebDriverUtils {
      *
      * @param locator The By locator of the element.
      * @return The WebElement if found and visible.
-     * @throws TimeoutException if the element is not found within the timeout
-     *                          period.
+     * @throws TimeoutException if the element is not found within the timeout period.
      */
     public WebElement findElement(By locator) {
         logger.debug("Attempting to find element by: {}", locator);
@@ -90,8 +90,7 @@ public class WebDriverUtils {
             return elements;
         } catch (TimeoutException e) {
             logger.warn("No elements found or not visible within timeout for: {}", locator);
-            return List.of(); // Return an empty list instead of throwing an exception if no elements are
-                              // found
+            return List.of();
         }
     }
 
@@ -111,7 +110,7 @@ public class WebDriverUtils {
             throw e;
         } catch (WebDriverException e) {
             logger.error("Error clicking element {}: {}", locator, e.getMessage(), e);
-            throw e; // Re-throw other WebDriver exceptions
+            throw e;
         }
     }
 
@@ -126,9 +125,9 @@ public class WebDriverUtils {
         String logSafeText = isSensitiveField(locator) ? MaskingUtil.maskSensitiveValue(text) : text;
         logger.info("Sending keys '{}' to element: {}", logSafeText, locator);
         try {
-            WebElement element = findElement(locator); // Uses findElement to ensure visibility
+            WebElement element = findElement(locator);
             element.clear();
-            element.sendKeys(text); // Actual value sent to browser — NOT masked
+            element.sendKeys(text);
             logger.info("Successfully sent keys '{}' to element: {}", logSafeText, locator);
         } catch (WebDriverException e) {
             logger.error("Error sending keys to element {}: {}", locator, e.getMessage(), e);
@@ -145,7 +144,7 @@ public class WebDriverUtils {
     public void selectByVisibleText(By locator, String text) {
         logger.info("Selecting '{}' from dropdown: {}", text, locator);
         try {
-            WebElement selectElement = findElement(locator); // Uses findElement to ensure visibility
+            WebElement selectElement = findElement(locator);
             Select select = new Select(selectElement);
             select.selectByVisibleText(text);
             logger.info("Successfully selected '{}' from dropdown: {}", text, locator);
@@ -166,7 +165,7 @@ public class WebDriverUtils {
      */
     public String getText(By locator) {
         logger.debug("Getting text from element: {}", locator);
-        WebElement element = findElement(locator); // Uses findElement to ensure visibility
+        WebElement element = findElement(locator);
         String text = element.getText();
         logger.info("Retrieved text '{}' from element: {}", text, locator);
         return text;
@@ -182,13 +181,12 @@ public class WebDriverUtils {
         logger.debug("Checking if element is displayed: {}", locator);
         try {
             return findElement(locator).isDisplayed();
-        } catch (NoSuchElementException | TimeoutException e) {
+        } catch (NoSuchElementException e) {
             logger.info("Element {} is not displayed.", locator);
             return false;
         } catch (StaleElementReferenceException e) {
             logger.warn("StaleElementReferenceException while checking display status for {}. Retrying...", locator);
             try {
-                // Retry once
                 return wait.until(ExpectedConditions.visibilityOfElementLocated(locator)).isDisplayed();
             } catch (Exception retryEx) {
                 logger.error("Element {} is still not displayed after retry.", locator, retryEx);
@@ -198,39 +196,12 @@ public class WebDriverUtils {
     }
 
     /**
-     * Waits for the URL to contain a specific string.
-     *
-     * @param urlChunk The string expected to be in the URL.
-     * @return true if the URL contains the string, false otherwise.
+     * Waits until the current page reaches the {@code complete} ready state.
+     * Use after navigation or actions that trigger a full page load before
+     * interacting with page elements.
      */
-    public boolean waitUntilUrlContains(String urlChunk) {
-        logger.info("Waiting for URL to contain: {}", urlChunk);
-        try {
-            return wait.until(ExpectedConditions.urlContains(urlChunk));
-        } catch (TimeoutException e) {
-            logger.error("URL did not contain '{}' within timeout. Current URL: {}", urlChunk, driver.getCurrentUrl());
-            return false;
-        }
-    }
-
-    /**
-     * Waits for the page title to contain a specific string.
-     *
-     * @param titleChunk The string expected to be in the page title.
-     * @return true if the title contains the string, false otherwise.
-     */
-    public boolean waitUntilTitleContains(String titleChunk) {
-        logger.info("Waiting for title to contain: {}", titleChunk);
-        try {
-            return wait.until(ExpectedConditions.titleContains(titleChunk));
-        } catch (TimeoutException e) {
-            logger.error("Page title did not contain '{}' within timeout. Current title: {}", titleChunk,
-                    driver.getTitle());
-            return false;
-        }
-    }
-
     public void waitForPageLoad() {
-        wait.until(d -> "complete".equals(((JavascriptExecutor) driver).executeScript("return document.readyState")));
+        wait.until(d -> "complete".equals(
+                ((JavascriptExecutor) driver).executeScript("return document.readyState")));
     }
 }
